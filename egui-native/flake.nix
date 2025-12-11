@@ -1,5 +1,5 @@
 {
-  description = "Rust + egui dev environment";
+  description = "eframe devShell";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
@@ -9,50 +9,32 @@
   outputs = { self, nixpkgs, flake-utils, ... }:
     flake-utils.lib.eachDefaultSystem (system:
       let
-        pkgs = nixpkgs.legacyPackages.${system};
+        pkgs = import nixpkgs { inherit system; };
       in
-      {
-        devShells.default = pkgs.mkShell {
-          LD_LIBRARY_PATH = pkgs.lib.makeLibraryPath [
-            pkgs.wayland
-            pkgs.libxkbcommon
-
-            pkgs.xorg.libX11
-            pkgs.xorg.libXcursor
-            pkgs.xorg.libXi
-            pkgs.xorg.libXrandr
-
-            pkgs.mesa
-            pkgs.mesa.drivers
-            pkgs.libglvnd
-            pkgs.libdrm
-
-            pkgs.vulkan-loader
-          ];
-
+      with pkgs; {
+        devShells.default = mkShell rec {
           buildInputs = [
-            pkgs.pkg-config
+            # misc. libraries
+            openssl
+            pkg-config
 
-            pkgs.wayland
-            pkgs.wayland-protocols
-            pkgs.libxkbcommon
+            # GUI libs
+            libxkbcommon
+            libGL
+            fontconfig
 
-            pkgs.xorg.libX11
-            pkgs.xorg.libXcursor
-            pkgs.xorg.libXi
-            pkgs.xorg.libXrandr
+            # wayland libraries
+            wayland
 
-            pkgs.mesa # GL, EGL
-            pkgs.libglvnd # OpenGL loader
-            pkgs.mesa.drivers # DRI 驱动 (要加这个 glutin 才能工作)
-            pkgs.libdrm
+            # x11 libraries
+            xorg.libXcursor
+            xorg.libXrandr
+            xorg.libXi
+            xorg.libX11
 
-            pkgs.vulkan-loader
           ];
 
-          RUST_BACKTRACE = 1;
-
+          LD_LIBRARY_PATH = "${lib.makeLibraryPath buildInputs}";
         };
-      }
-    );
+      });
 }
