@@ -1,0 +1,10 @@
+[package]
+name = "egui-wasm"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+eframe = "0.33.2"
+log = "0.4.29"
+wasm-bindgen-futures = "0.4.56"
+web-sys = "0.3.83"
